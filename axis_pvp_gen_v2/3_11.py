@@ -68,7 +68,7 @@ class AxiPvpGen(SocIp):
         
         
     
-    def set_start(self, axis = '', start_val = 0.123):
+    def set_start(self, axis = '', start_val = 0b00):
         '''method to set start val 
             (note that we want a method for this because we don't want to worry about registers outside this class)'''
         if (axis == '0'):
@@ -83,7 +83,12 @@ class AxiPvpGen(SocIp):
             raise ValueError("No valid axis was specified. Valid axis arguments are '0', '1', '2', '3'")
        
     ## TODO: trigger source method. or maybe that gets set in some initialization routine?
-    ## TODO: methods for start_pvp, set_dwell_cycles
+    
+    def start_pvp(self):
+        self.trigger_pvp_reg = 0b1
+            
+    def set_dwell_cycles(self, dwell_cycles = 38400):
+        self.dwell_cycles_reg = dwell_cycles
     
     def set_step_size(self, step_size = 0):
         '''sets size of step (in Volts??)'''
@@ -98,18 +103,22 @@ class AxiPvpGen(SocIp):
         
     def set_demux(self, axis = '', demux = -1): 
         #note to self: do we specify demux value or ask for board num and dac num?
-        if (demux > 0 and demux < 32):
+        if (demux >= 0 and demux < 32):
             if (axis == '0'):
-                self.start_val_0_reg = demux
+                self.demux_0_reg = demux
             elif (axis == '1'):
-                self.start_val_1_reg = demux
+                self.demux_1_reg = demux
             elif (axis == '2'):
-                self.start_val_2_reg = demux
+                self.demux_2_reg = demux
             elif (axis == '3'):
-                self.start_val_3_reg = demux
+                self.demux_3_reg = demux
             else:
                 raise ValueError("No valid axis was specified. Valid axis arguments are '0', '1', '2', '3'")
         else:
             raise ValueError("Demux value must be in the range 0-31 inclusive")
             
-    
+    def set_2D_pvp_parameters(self, start1, start2, demux1, demux2):
+        self.set_start("0", start1)
+        self.set_start("1", start2)
+        self.set_demux("0", demux1)
+        self.set_demux("1", demux2)
